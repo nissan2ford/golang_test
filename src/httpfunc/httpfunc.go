@@ -56,17 +56,28 @@ func GetHttpStatusDur(urls []string)(<-chan string, <-chan string, <-chan time.D
 	return reqUrl,statusChan,duration // return url,status,duration
 }
 
-func ConnHttp(url string)(<-chan string) {
-	// make channel in function
-	statusChan := make(chan string)
+func ConnHttp(url string)(reqUrl string, resCode string,duration time.Duration) {
+	// starttime
+	starttime := time.Now()
 
 	res, err := http.Get(url)
+
+	// endtime
+	endtime := time.Now()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer res.Body.Close()
 
-	statusChan <- res.Status
+	// request URL
+	reqUrl = url
+
+	// Duration
+	duration = endtime.Sub(starttime)
+
+	// Response Code
+	resCode = res.Status
 	
-	return statusChan
+	return reqUrl, resCode, duration
 }

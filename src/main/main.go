@@ -10,20 +10,28 @@ func main() {
 	urls := []string{
 		"http://192.168.11.1",
 		"http://www.yahoo.co.jp",
+		"http://github.com",
 	}
 
-	starttime := time.Now()
+	// make channel
+	responseChan := make(chan string)
+	durationChan := make(chan time.Duration)
+	reqUrlChan := make(chan string)
 
-	reqUrl,statusChan := httpfunc.GetHttpStatus(urls)
+	for _, url := range urls {
 
-	endtime := time.Now()
+		// go routine
+		go func(url string) {
 
-	duration := endtime.Sub(starttime)
+			requrl,rescode,duration := httpfunc.ConnHttp(url)
 
-//	reqUrl,statusChan,duration := httpfunc.GetHttpStatusDur(urls)
+			reqUrlChan <- requrl
+			responseChan <- rescode
+			durationChan <- duration
+		}(url)
+	}
 
 	for i := 0; i < len(urls); i++ {
-//		fmt.Println(<-reqUrl,<-statusChan)
-		fmt.Println(<-reqUrl,<-statusChan,"TAT=",duration)
+		fmt.Println(<-reqUrlChan,<-responseChan,"TAT=",<-durationChan)
 	}
 }
